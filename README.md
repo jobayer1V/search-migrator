@@ -9,7 +9,7 @@ You can run the CLI directly using `npx` without any installation, which ensures
 ### Using npx
 
 ```sh
-npx migrate-to-upstash-search
+npx @upstash/search-migrator
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ The CLI can be run by passing command-line flags; otherwise, those credentials w
 Simply run the command without any flags to be guided through the migration process with interactive prompts.
 
 ```sh
-npx migrate-to-upstash-search
+npx @upstash/search-migrator
 ```
 
 ### Using Flags
@@ -29,7 +29,7 @@ npx migrate-to-upstash-search
 You can also provide your credentials and other information as command-line flags.
 
 ```sh
-npx migrate-to-upstash-search \
+npx @upstash/search-migrator \
   --upstash-url "YOUR_UPSTASH_URL" \
   --upstash-token "YOUR_UPSTASH_TOKEN" \
   --algolia-app-id "YOUR_ALGOLIA_APP_ID" \
