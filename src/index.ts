@@ -1,16 +1,20 @@
 // #!/usr/bin/env node
 
-import { runCli } from "./cli/migrate-from-algolia.js"
+import { runCli } from "./cli/index.js"
 import { logger } from "./utils/logger.js"
-import { main as migrate } from "./scripts/algolia-data-tranfer.js"
-
+import { main as migrateAlgolia } from "./scripts/algolia-data-tranfer.js"
+import { main as migrateMeilisearch } from "./scripts/meilisearch-data-transfer.js"
 const main = async () => {
-  const results = await runCli() // TODO: Add a check to see if the user wants to migrate from Algolia or Upstash
+  const results = await runCli()
   if (!results) {
     return
   }
-  await migrate(results)
-
+  if ("algoliaClient" in results) { // TODO: Do a proper type checking
+    await migrateAlgolia(results)
+  } else if ("meilisearchClient" in results) {
+    await migrateMeilisearch(results)
+  }
+  
   process.exit(0)
 }
 

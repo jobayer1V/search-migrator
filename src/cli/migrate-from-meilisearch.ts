@@ -1,19 +1,19 @@
 import { OptionValues } from "commander"
 import { isCancel, outro, select, text, multiselect, spinner, confirm } from "@clack/prompts"
-import { createAlgoliaClient, createUpstashClient } from "../utils/client.js"
-import { getAlgoliaIndexFields } from "@/schemas/algolia.js"
-import { SearchClient } from "@algolia/client-search"
+import { createMeilisearchClient, createUpstashClient } from "../utils/client.js"
+import { getMeilisearchIndexFields } from "../schemas/meilisearch.js"
+import { Meilisearch } from "meilisearch";  
 import { Search } from "@upstash/search"
 
-export interface AlgoliaCliResults {
-  algoliaClient: SearchClient
+export interface MeilisearchCliResults {
+  meilisearchClient: Meilisearch
   upstashClient: Search
   upstashIndexName: string
-  algoliaIndexName: string
+  meilisearchIndexName: string
   contentKeys: string[]
 }
 
-export async function runAlgoliaCli(options? : OptionValues): Promise<AlgoliaCliResults | undefined> {
+export async function runMeilisearchCli(options? : OptionValues): Promise<MeilisearchCliResults | undefined> {
 
   const upstashUrl =
     options?.upstashUrl ??
@@ -97,68 +97,67 @@ if (isCancel(upstashIndexName)) {
   return undefined
 }
 
-  const algoliaAppId =
-    options?.algoliaAppId ??
+  const meilisearchHost =
+    options?.meilisearchHost ??
     (await text({
-      message: "What is your Algolia App ID?",
-      placeholder: "algolia-app-id",
+      message: "What is your Meilisearch Host?",
+      placeholder: "https://***.meilisearch.io",
       validate: (value) => {
-        if (!value) return "Please enter your Algolia App ID"
+        if (!value) return "Please enter your Meilisearch Host"
         return
       },
     }))
 
-  if (isCancel(algoliaAppId)) {
+  if (isCancel(meilisearchHost)) {
     outro("Migration cancelled.")
     return undefined
   }
 
-  const algoliaApiKey =
-    options?.algoliaApiKey ??
+  const meilisearchApiKey =
+    options?.meilisearchApiKey ??
     (await text({
-      message: "What is your Algolia (write) API Key?",
-      placeholder: "algolia-api-key",
+      message: "What is your Meilisearch API Key?",
+      placeholder: "meilisearch-api-key",
       validate: (value) => {
-        if (!value) return "Please enter your Algolia API Key"
+        if (!value) return "Please enter your Meilisearch API Key"
         return
       },
     }))
 
-  if (isCancel(algoliaApiKey)) {
+  if (isCancel(meilisearchApiKey)) {
     outro("Migration cancelled.")
     return undefined
   }
 
-  s.start("Fetching Algolia Indexes")
+  s.start("Fetching Meilisearch Indexes")
 
-  const algoliaClient = createAlgoliaClient(algoliaAppId, algoliaApiKey)
-  const algoliaIndices = await algoliaClient.listIndices()
-  const algoliaIndexNames = algoliaIndices.items.map((index) => index.name)
+  const meilisearchClient = createMeilisearchClient(meilisearchHost, meilisearchApiKey)
+  const meilisearchIndexResults = (await meilisearchClient.getRawIndexes()).results
+  const meilisearchIndexNames = meilisearchIndexResults.map((index) => index.uid)
 
-  if (algoliaIndexNames.length === 0) {
+  if (meilisearchIndexNames.length === 0) {
     s.stop()
-    outro("No Algolia Indexes found. Please create an index first.")
+    outro("No Meilisearch Indexes found. Please create an index first.")
     return undefined
   }
 
-  s.stop("Algolia Indexes fetched")
+  s.stop("Meilisearch Indexes fetched")
 
-  const algoliaIndexName =
-    
+  const meilisearchIndexName =
     (await select({
-      message: "Choose an Algolia Index to migrate from:",
-      options: algoliaIndexNames.map((name) => ({
+      message: "Choose a Meilisearch Index to migrate from:",
+      options: meilisearchIndexNames.map((name) => ({
         value: name,
         label: name,
       })),
     }))
 
-  if (isCancel(algoliaIndexName)) {
+  if (isCancel(meilisearchIndexName)) {
     outro("Migration cancelled.")
     return undefined
   }
 
-  const indexFields = await getAlgoliaIndexFields(algoliaClient, algoliaIndexName)
+  const indexFields = await getMeilisearchIndexFields(meilisearchClient, meilisearchIndexName)
 
   const contentKeys = await multiselect({
     message: "Select fields to include in content (use space bar to select)",
@@ -175,10 +174,10 @@ if (isCancel(upstashIndexName)) {
 
 
   return {
-    algoliaClient,
+    meilisearchClient,
     upstashClient,
     upstashIndexName,
-    algoliaIndexName,
+    meilisearchIndexName,
     contentKeys: contentKeysArray,
   }
 }

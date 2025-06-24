@@ -45,6 +45,7 @@ async function fetchAndUpsertAllData({ algoliaClient, upstashClient, upstashInde
         }
     }
     logger.success(`All records from Algolia have been upserted to Upstash. Total: ${totalUpserted}`);
+    logger.success(`Visit https://console.upstash.com/search/ to query your data.`)
 }
 
 export async function main({
