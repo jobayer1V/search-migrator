@@ -67,5 +67,5 @@ npx @upstash/search-migrator \
 
 1.  Go to your [Meilisearch Console](https://cloud.meilisearch.com/).
 2.  Find your Meilisearch deployment and copy the **Host URL** and **API Key**.
-    *   `--meili-host` corresponds to your Meilisearch instance URL (e.g., `https://ms-xxxxxx.meilisearch.io`).
-    *   `--meili-api-key` corresponds to your Meilisearch API key.
+*   `--meili-host` corresponds to your Meilisearch instance URL (e.g., `https://ms-xxxxxx.meilisearch.io`).
+*   `--meili-api-key` corresponds to your Meilisearch API key.
